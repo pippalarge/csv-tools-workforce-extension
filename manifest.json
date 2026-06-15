@@ -1,0 +1,297 @@
+{
+  "actions": [
+    {
+      "name": "parseCsv",
+      "label": "Parse CSV to rows",
+      "description": "Takes a CSV string and returns its data rows as an array of objects, keyed by the header row. Use this to turn an uploaded or fetched CSV into structured records that a flow can iterate over. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "csv": {
+            "type": "string",
+            "title": "CSV content",
+            "description": "The full CSV text, including the header row."
+          },
+          "delimiter": {
+            "type": "string",
+            "title": "Delimiter",
+            "description": "Field delimiter. Defaults to a comma."
+          }
+        },
+        "required": ["csv"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "title": "Rows",
+            "items": {
+              "type": "object"
+            }
+          },
+          "count": {
+            "type": "number",
+            "title": "Row count"
+          }
+        }
+      }
+    },
+    {
+      "name": "arrayToCsv",
+      "label": "Save to CSV",
+      "description": "Takes an array of row objects and serialises it into a single CSV string, with a header row derived from the object keys. Use this to turn structured records back into a downloadable or storable CSV. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "title": "Rows",
+            "description": "The records to write. Each item is an object whose keys become CSV columns.",
+            "items": {
+              "type": "object"
+            }
+          },
+          "columns": {
+            "type": "array",
+            "title": "Columns",
+            "description": "Optional explicit column order. If omitted, columns are the union of keys across all rows in first-seen order.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "delimiter": {
+            "type": "string",
+            "title": "Delimiter",
+            "description": "Field delimiter. Defaults to a comma."
+          }
+        },
+        "required": ["rows"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "csv": {
+            "type": "string",
+            "title": "CSV content"
+          },
+          "count": {
+            "type": "number",
+            "title": "Row count"
+          }
+        }
+      }
+    },
+    {
+      "name": "filterRows",
+      "label": "Filter rows",
+      "description": "Keeps only the rows where a chosen column satisfies a condition. Operators: eq, ne, gt, gte, lt, lte, contains, empty, notEmpty. Use to drop blank or unwanted records before further processing. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "column": { "type": "string", "title": "Column to test" },
+          "operator": { "type": "string", "title": "Operator", "description": "eq, ne, gt, gte, lt, lte, contains, empty, or notEmpty." },
+          "value": { "type": "string", "title": "Comparison value" }
+        },
+        "required": ["rows", "column"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Filtered rows", "items": { "type": "object" } },
+          "count": { "type": "number", "title": "Rows kept" },
+          "removed": { "type": "number", "title": "Rows removed" }
+        }
+      }
+    },
+    {
+      "name": "mapColumns",
+      "label": "Rename columns",
+      "description": "Renames object keys using a mapping of old name to new name. Unmapped keys pass through unless dropUnmapped is true. Use to align CSV headers with the field names a downstream API expects. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "mapping": { "type": "object", "title": "Mapping", "description": "An object of { oldKey: newKey } pairs." },
+          "dropUnmapped": { "type": "boolean", "title": "Drop unmapped columns" }
+        },
+        "required": ["rows", "mapping"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "count": { "type": "number", "title": "Row count" }
+        }
+      }
+    },
+    {
+      "name": "selectColumns",
+      "label": "Select columns",
+      "description": "Keeps only the listed columns, in the order given, and drops the rest. Use to send an API just the fields it needs. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "columns": { "type": "array", "title": "Columns to keep", "items": { "type": "string" } }
+        },
+        "required": ["rows", "columns"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "count": { "type": "number", "title": "Row count" }
+        }
+      }
+    },
+    {
+      "name": "transformRows",
+      "label": "Clean and coerce rows",
+      "description": "Cleans row values: trims whitespace, converts listed columns to numbers or booleans, and fills empty cells with a default. CSV values arrive as strings, so use this to give them the right types before sending to an API. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "trim": { "type": "boolean", "title": "Trim whitespace" },
+          "numericColumns": { "type": "array", "title": "Numeric columns", "items": { "type": "string" } },
+          "booleanColumns": { "type": "array", "title": "Boolean columns", "items": { "type": "string" } },
+          "emptyDefault": { "type": "string", "title": "Default for empty cells" }
+        },
+        "required": ["rows"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "count": { "type": "number", "title": "Row count" }
+        }
+      }
+    },
+    {
+      "name": "chunkRows",
+      "label": "Chunk rows into batches",
+      "description": "Splits an array of rows into batches of a given size. Useful for staying under the per-execution API request limit by processing one batch per flow run. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "size": { "type": "number", "title": "Batch size" }
+        },
+        "required": ["rows"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "chunks": { "type": "array", "title": "Chunks", "items": { "type": "array", "items": { "type": "object" } } },
+          "chunkCount": { "type": "number", "title": "Number of chunks" },
+          "rowCount": { "type": "number", "title": "Total rows" }
+        }
+      }
+    },
+    {
+      "name": "validateRows",
+      "label": "Validate rows",
+      "description": "Splits rows into valid and invalid based on required (non-empty) columns. Invalid rows are returned with an _errors array explaining what failed. Use to catch bad data before it reaches an API. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "required": { "type": "array", "title": "Required columns", "items": { "type": "string" } }
+        },
+        "required": ["rows", "required"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "valid": { "type": "array", "title": "Valid rows", "items": { "type": "object" } },
+          "invalid": { "type": "array", "title": "Invalid rows", "items": { "type": "object" } },
+          "validCount": { "type": "number", "title": "Valid count" },
+          "invalidCount": { "type": "number", "title": "Invalid count" }
+        }
+      }
+    },
+    {
+      "name": "dedupeRows",
+      "label": "Deduplicate rows",
+      "description": "Removes duplicate rows by a key (a single column name or an array of column names), keeping the first occurrence. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "key": { "type": "array", "title": "Key column(s)", "items": { "type": "string" }, "description": "One or more column names that define uniqueness." }
+        },
+        "required": ["rows", "key"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "count": { "type": "number", "title": "Row count" },
+          "duplicatesRemoved": { "type": "number", "title": "Duplicates removed" }
+        }
+      }
+    },
+    {
+      "name": "toJson",
+      "label": "Rows to JSON",
+      "description": "Serialises an array of rows into a JSON string, optionally pretty-printed. Use when a step or API expects JSON rather than CSV. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "pretty": { "type": "boolean", "title": "Pretty-print" }
+        },
+        "required": ["rows"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "json": { "type": "string", "title": "JSON string" },
+          "count": { "type": "number", "title": "Row count" }
+        }
+      }
+    },
+    {
+      "name": "fromJson",
+      "label": "JSON to rows",
+      "description": "Parses a JSON string into an array of rows. Accepts either a JSON array or an object wrapping an array under a 'rows' key. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "json": { "type": "string", "title": "JSON string" }
+        },
+        "required": ["json"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "count": { "type": "number", "title": "Row count" }
+        }
+      }
+    },
+    {
+      "name": "summarizeRows",
+      "label": "Summarize rows",
+      "description": "Produces per-column statistics: non-empty count, distinct count, and numeric min/max/sum where values parse as numbers. Use to inspect what is in a file before processing it. Makes no external API calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "array", "title": "Rows", "items": { "type": "object" } },
+          "columns": { "type": "array", "title": "Columns", "items": { "type": "string" }, "description": "Optional subset of columns to summarize." }
+        },
+        "required": ["rows"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rowCount": { "type": "number", "title": "Row count" },
+          "columnCount": { "type": "number", "title": "Column count" },
+          "columns": { "type": "array", "title": "Per-column stats", "items": { "type": "object" } }
+        }
+      }
+    }
+  ]
+}
