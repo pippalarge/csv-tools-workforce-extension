@@ -1,0 +1,11 @@
+{
+  "name": "csv-tools-workforce-extension",
+  "version": "0.1.0",
+  "description": "Amplience Workforce extension: CSV/tabular data-shaping actions",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}

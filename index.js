@@ -58,10 +58,19 @@ function splitRecords(text) {
 }
 
 // Parse a single CSV line into an array of field values, honouring quotes.
+// Quoted fields are preserved exactly (internal whitespace kept); unquoted
+// fields are trimmed for lenience with hand-edited CSVs.
 function parseLine(line, delimiter) {
   const fields = [];
   let field = "";
   let inQuotes = false;
+  let wasQuoted = false; // did this field contain a quoted section?
+
+  const pushField = () => {
+    fields.push(wasQuoted ? field : field.trim());
+    field = "";
+    wasQuoted = false;
+  };
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
@@ -71,16 +80,16 @@ function parseLine(line, delimiter) {
         i++;
       } else {
         inQuotes = !inQuotes;
+        wasQuoted = true;
       }
     } else if (char === delimiter && !inQuotes) {
-      fields.push(field);
-      field = "";
+      pushField();
     } else {
       field += char;
     }
   }
-  fields.push(field);
-  return fields.map((f) => f.trim());
+  pushField();
+  return fields;
 }
 
 // Workforce extension action: serialise an array of row objects back into a CSV string.
