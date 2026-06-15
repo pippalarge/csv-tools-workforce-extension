@@ -1,4 +1,8 @@
 {
+  "envSchema": {
+    "type": "object",
+    "properties": {}
+  },
   "actions": [
     {
       "name": "parseCsv",
