@@ -6,6 +6,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "validate": "node validate.mjs",
+    "check": "node --test && node validate.mjs"
   }
 }
