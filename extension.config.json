@@ -1,6 +1,6 @@
 {
-  "label": "CSV Tools",
-  "version": "0.1.0",
+  "label": "Table Tools",
+  "version": "0.2.0",
   "docsUrl": "https://github.com/pippalarge/csv-tools-workforce-extension",
   "descriptionFile": "description.md",
   "iconFile": "csv-icon-base64.txt"

@@ -1,7 +1,7 @@
 {
-  "name": "csv-tools-workforce-extension",
-  "version": "0.1.0",
-  "description": "Amplience Workforce extension: CSV/tabular data-shaping actions",
+  "name": "table-tools-workforce-extension",
+  "version": "0.2.0",
+  "description": "Amplience Workforce extension: Table Tools — shape tabular data as rows (filter, sort, join, add/drop columns, validate, CSV/JSON adapters)",
   "license": "MIT",
   "type": "module",
   "private": true,
